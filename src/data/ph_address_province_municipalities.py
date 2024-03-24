@@ -1079,6 +1079,7 @@ ph_address_province_municipalities = {
     "NATIONAL CAPITAL REGION": [
         "LAS PIÑAS CITY",
         "MAKATI CITY",
+        "MANDALUYONG CITY",
         "MARIKINA CITY",
         "MUNTINLUPA CITY",
         "PARAÑAQUE CITY",
@@ -1101,7 +1102,6 @@ ph_address_province_municipalities = {
         "SAN NICOLAS",
         "SANTA ANA",
         "SANTA CRUZ",
-        "TONDOCITY OF MANDALUYONG",
     ],
     "NEGROS OCCIDENTAL": [
         "BACOLOD CITY",
