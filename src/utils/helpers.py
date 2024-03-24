@@ -146,3 +146,25 @@ def getProvince(addr: str):
         #     foundProvince = "MUNICIPALITY LIST: " + ph_address_municipality[capAddress]
         #     break
     return foundProvince
+
+
+def is_location_remote(job_location: str) -> bool:
+    remote_string_patterns = [
+        "hybrid work",
+        "from home",
+        "work from home",
+        "hybrid",
+        "remote",
+    ]
+    for remote_string_pattern in remote_string_patterns:
+        remote_match = re.search(
+            remote_string_pattern, job_location, flags=re.IGNORECASE
+        )
+        if remote_match:
+            return True
+    return False
+
+
+def is_location_unspecified(job_location: str) -> bool:
+    country_match = re.search("philippine", job_location, flags=re.IGNORECASE)
+    return bool(country_match)
