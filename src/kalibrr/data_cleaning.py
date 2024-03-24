@@ -1,4 +1,4 @@
-from utils.helpers import getProvince
+from utils.helpers import get_province
 # -----------------------
 # Senior Software Developer
 # Sandman Software Systems Inc.
@@ -49,7 +49,7 @@ def normalizeData(stringData:str):
         if(index == 0):
             normalizedData["job_title"] = data
         elif(index == 2):
-            normalizedData["location"] = getProvince(data) 
+            normalizedData["location"] = get_province(data) 
         elif(index == 3):
             normalizedData["salary"] = data
         elif(index ==4):
