@@ -173,3 +173,7 @@ def is_location_remote(job_location: str) -> bool:
 def is_location_unspecified(job_location: str) -> bool:
     country_match = re.search("philippine", job_location, flags=re.IGNORECASE)
     return bool(country_match)
+
+
+def normalize_scraped_salary(base_salary: int, max_salary: int) -> int:
+    return (base_salary + max_salary) / 2
