@@ -378,6 +378,7 @@ ph_address_municipality = {
     "CORTES": "SURIGAO DEL SUR",
     "COTABATO CITY": "MAGUINDANAO",
     "CUARTERO": "CAPIZ",
+    "CUBAO": "NATIONAL CAPITAL REGION",
     "CUENCA": "BATANGAS",
     "CULABA": "BILIRAN",
     "CULASI": "ANTIQUE",

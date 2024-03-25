@@ -363,6 +363,7 @@ municipality_list = [
     "CORTES",
     "COTABATO CITY",
     "CUARTERO",
+    "CUBAO",
     "CUENCA",
     "CULABA",
     "CULASI",
