@@ -1,15 +1,11 @@
-from philippine_addresses import (
-    ph_address_province_municipalities,
-    ph_address_municipality,
-    province_list,
-    municipality_list,
-)
+from data.ph_address_municipality import ph_address_municipality
+from data.province_list import province_list
+from data.municipality_list import municipality_list
 import re
+import logging
 
 # input address should be separated by commas
 # street, barangay, municipality, province, country
-# suna village, sumpong, malaybalay city, bukidnon, philippines
-# suna village, sumpong, makati, bukidnon, philippines
 
 
 # performs a binary search on province/municipality list
@@ -118,34 +114,43 @@ def get_municipalities_with_initial(targetString: str) -> list[str]:
     return sorted(municipality_list_subset)
 
 
-def getProvince(addr: str):
+def get_province(addr: str):
 
-    foundProvince = ""
-    provinces = list(ph_address_province_municipalities)
-    municipalites = list(ph_address_municipality)
-
+    found_province = ""
     addresses = addr.split(",")
 
     for address in addresses:
-        capAddress = address.upper()
-        isCity = re.search("city", capAddress, re.IGNORECASE)
-        for province in provinces:
-            if re.search(province, capAddress, re.IGNORECASE) and not isCity:
-                foundProvince = province + "  address:  " + address
-                break
-        # for municipality in municipalites:
-        #     if(re.search(municipalites,capAddress,re.IGNORECASE)):
-        #         foundProvince = municipality;
-        #         break
 
-        # isCity = re.search("city", address, re.IGNORECASE)
-        # if(capAddress in provinces):
-        #     foundProvince = "PROVINCELIST: " +  provinces.pop(provinces.index(capAddress))
-        #     break
-        # if(capAddress in municipalites):
-        #     foundProvince = "MUNICIPALITY LIST: " + ph_address_municipality[capAddress]
-        #     break
-    return foundProvince
+        municipalities = get_municipalities_with_initial(address)
+        is_matched = False
+        for municipality in municipalities:
+            match = re.search(address, municipality, flags=re.IGNORECASE)
+            if bool(match):
+                found_province = (
+                    f"{ph_address_municipality[municipality]}, {municipality}"
+                )
+                is_matched = True
+                break
+
+        if is_matched:
+            break
+
+        provinces = get_provinces_with_initial(address)
+        for province in provinces:
+            match = re.search(address, province, flags=re.IGNORECASE)
+            if bool(match):
+                found_province = province
+                break
+
+    if len(found_province) < 1:
+        logging.basicConfig(
+            filename="./logs/empty_addresses.log",
+            filemode="a",
+            format="[%(asctime)s - %(levelname)s]: Location not found during scraping: (%(message)s)",
+        )
+        logging.warning(addr)
+
+    return found_province
 
 
 def is_location_remote(job_location: str) -> bool:
