@@ -1,6 +1,7 @@
 from data.ph_address_municipality import ph_address_municipality
 from data.province_list import province_list
 from data.municipality_list import municipality_list
+from data.job_levels import job_levels
 import re
 import logging
 
@@ -177,3 +178,39 @@ def is_location_unspecified(job_location: str) -> bool:
 
 def normalize_scraped_salary(base_salary: int, max_salary: int) -> int:
     return (base_salary + max_salary) / 2
+
+
+def determine_job_level(string_data: str) -> str:
+    for job_level_pattern in job_levels:
+        match = re.search(job_level_pattern, string_data, re.IGNORECASE)
+        if bool(match):
+            return match.group()
+    return ""
+
+
+def normalize_job_level(raw_job_level: str) -> str:
+
+    job_levels: dict = {
+        "entry": "entry level",
+        "fresh": "fresh graduate",
+        "intern": "internship",
+        "junior": "junior",
+        "jr": "junior",
+        "mid": "mid",
+        "ojt": "ojt",
+        "senior": "senior",
+        "sr": "senior",
+    }
+
+    for job_level in job_levels:
+        if raw_job_level.lower().startswith(job_level):
+            return job_levels[job_level]
+
+    logging.basicConfig(
+        filename="./logs/invalid_raw_job_level.log",
+        filemode="a",
+        format="[%(asctime)s - %(levelname)s]: Job level not found during scraping: (%(message)s)",
+    )
+    logging.warning(raw_job_level)
+
+    return ""
