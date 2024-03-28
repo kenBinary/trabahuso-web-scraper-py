@@ -1,10 +1,9 @@
-# from .test import test
-import kalibrr.kalibrr_scraper as kalibrr
-import test as test
+import indeed.indeed_scraper as indeed
+
 
 def main():
-    test.test()
-    # kalibrr.scrape()
+    indeed.scrape_indeed()
+
 
 if __name__ == "__main__":
     main()
