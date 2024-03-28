@@ -2,10 +2,12 @@ import utils.scraping_util as scraper
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException
+import logging
 import uuid
 import time
 from datetime import datetime
 import re
+import sqlite3
 from selenium.webdriver.remote.webdriver import WebDriver
 from utils.helpers import (
     is_location_remote,
@@ -140,16 +142,72 @@ def scrape_indeed():
 
     is_end_of_page = True
     while is_end_of_page:
+        page = 0
         time.sleep(2)
-        scraped_data = scrape_page(browser)
-        print("--------------------------------------------")
-        print(scraped_data)
+
+        scraped_data: list[dict] = []
+        if page == 1:
+            break
+
+        try:
+            scraped_data = scrape_page(browser)
+        except BaseException as e:
+            logging.basicConfig(
+                filename="./logs/page_scraping.log",
+                filemode="a",
+                format="[%(asctime)s - %(levelname)s]: %(message)s",
+            )
+            logging.warning(f"Could not scrape at page: {page}")
+            logging.error(f"Error Type: {e}")
+            break
+
+        try:
+            connection = sqlite3.connect("../../db/job_record.db")
+            cursor = connection.cursor()
+
+            for data in scraped_data:
+
+                cursor.execute(
+                    "INSERT INTO job_data VALUES (?,?,?,?,?,?);",
+                    (
+                        data["job_data_id"],
+                        data["title"],
+                        data["location"],
+                        data["salary"],
+                        data["job_level"],
+                        data["date_scraped"],
+                    ),
+                )
+
+                tech_stack = data["tech_stack"]
+                for tech in tech_stack:
+                    cursor.execute(
+                        "INSERT INTO tech_skill VALUES (?,?,?);",
+                        (
+                            tech["tech_stack_id"],
+                            tech["job_data_id"],
+                            tech["tech_type"],
+                        ),
+                    )
+
+            connection.commit()
+        except BaseException as e:
+
+            logging.basicConfig(
+                filename="./logs/insert_records_to_db.log",
+                filemode="a",
+                format="[%(asctime)s - %(levelname)s]: %(message)s",
+            )
+            logging.error(f"Error Occured while inserting data to db: {e}")
+        finally:
+            connection.close()
 
         try:
             next_page_button_locator = "[data-testid='pagination-page-next']"
             x = scraper.getElement(browser, By.CSS_SELECTOR, next_page_button_locator)
             x.click()
-
         except NoSuchElementException:
             is_end_of_page = False
             break
+
+        page += 1
