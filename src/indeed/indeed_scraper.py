@@ -1,13 +1,12 @@
 import utils.scraping_util as scraper
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import StaleElementReferenceException
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import NoSuchElementException
 import uuid
 import time
 from datetime import datetime
 import re
+from selenium.webdriver.remote.webdriver import WebDriver
 from utils.helpers import (
     is_location_remote,
     is_location_unspecified,
@@ -19,10 +18,7 @@ from utils.helpers import (
 )
 
 
-def scrape():
-
-    url = "https://ph.indeed.com/jobs?q=software%20developer&fromage=7&sort=date"
-    browser = scraper.browserDriver(url)
+def scrape_page(browser: WebDriver) -> list[dict]:
 
     # left pane job list
     jobCardSelector = "#mosaic-provider-jobcards > ul > li"
@@ -131,6 +127,29 @@ def scrape():
             job_list.append(job_detail)
 
             fresh_card.click()
-            time.sleep(2)
-    print(job_list)
-    # browser.quit()
+            time.sleep(3)
+    return job_list
+
+
+def scrape_indeed():
+
+    browser = scraper.browserDriver()
+    # baseUrl = rf"https://ph.indeed.com/jobs?q=software%20developer&fromage=7&sort=date&start={page}"
+    baseUrl = rf"https://ph.indeed.com/jobs?q=software%20developer&fromage=7&sort=date&start=0"
+    browser.get(baseUrl)
+
+    is_end_of_page = True
+    while is_end_of_page:
+        time.sleep(2)
+        scraped_data = scrape_page(browser)
+        print("--------------------------------------------")
+        print(scraped_data)
+
+        try:
+            next_page_button_locator = "[data-testid='pagination-page-next']"
+            x = scraper.getElement(browser, By.CSS_SELECTOR, next_page_button_locator)
+            x.click()
+
+        except NoSuchElementException:
+            is_end_of_page = False
+            break
