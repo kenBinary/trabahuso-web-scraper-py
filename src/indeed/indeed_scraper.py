@@ -15,6 +15,7 @@ from utils.helpers import (
     normalize_scraped_salary,
     determine_job_level,
     normalize_job_level,
+    determine_tech_stack,
 )
 
 
@@ -42,14 +43,18 @@ def scrape():
     job_cards = scraper.getElements(browser, By.CSS_SELECTOR, jobCardSelector)
     for index, job in enumerate(job_cards):
 
+        job_data_id = str(uuid.uuid4())
         job_detail: dict = {
-            "job_data_id": str(uuid.uuid4()),
+            "job_data_id": job_data_id,
             "title": None,
             "location": None,
             "salary": None,
             "job_level": None,
             "date_scraped": datetime.today().strftime("%Y-%m-%d"),
+            "tech_stack": [],
         }
+
+        tech_stack_list: list[str] = []
 
         fresh_job_cards = scraper.getElements(browser, By.CSS_SELECTOR, jobCardSelector)
         fresh_card = fresh_job_cards[index]
@@ -102,6 +107,26 @@ def scrape():
             if bool(raw_job_level):
                 job_level = normalize_job_level(raw_job_level)
                 job_detail["job_level"] = job_level
+
+            # TECH STACK
+            try:
+                job_description = scraper.getElement(
+                    browser, By.ID, job_description_id
+                ).text
+
+                tech_list = determine_tech_stack(job_description)
+                for tech in tech_list:
+                    tech_skill: dict = {
+                        "tech_stack_id": str(uuid.uuid4()),
+                        "job_data_id": job_data_id,
+                        "tech_type": tech,
+                    }
+                    tech_stack_list.append(tech_skill)
+
+            except NoSuchElementException:
+                pass
+            finally:
+                job_detail["tech_stack"] = tech_stack_list
 
             job_list.append(job_detail)
 

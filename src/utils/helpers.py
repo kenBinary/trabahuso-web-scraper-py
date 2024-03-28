@@ -2,6 +2,7 @@ from data.ph_address_municipality import ph_address_municipality
 from data.province_list import province_list
 from data.municipality_list import municipality_list
 from data.job_levels import job_levels
+from data.tech_keywords import tech_keywords
 import re
 import logging
 
@@ -214,3 +215,25 @@ def normalize_job_level(raw_job_level: str) -> str:
     logging.warning(raw_job_level)
 
     return ""
+
+
+def determine_tech_stack(string_data: str) -> list[str]:
+
+    tech_stack: list[str] = []
+    for tech_keyword in tech_keywords:
+        special_characters = [
+            "#",
+            "+",
+        ]
+
+        pattern = ""
+        if tech_keyword[-1] in special_characters:
+            pattern = rf"\b{tech_keyword}\{tech_keyword[-1]}{{1,}}\b,?"
+        else:
+            pattern = rf"\b{tech_keyword}(?![+#])\b,?"
+
+        match = re.search(pattern, string_data, re.IGNORECASE)
+        if bool(match):
+            tech_stack.append(tech_keyword)
+
+    return tech_stack
