@@ -6,7 +6,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
 
 
-def browserDriver(url: str):
+def browserDriver():
 
     service = Service(
         r"C:\Users\Kenneth\Downloads\Compressed\geckodriver-v0.34.0-win64\geckodriver.exe"
@@ -20,7 +20,6 @@ def browserDriver(url: str):
     )
 
     browser = webdriver.Firefox(service=service, options=driver_options)
-    browser.get(url)
     return browser
 
 
