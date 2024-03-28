@@ -23,6 +23,7 @@ tech_keywords = [
     "clojure",
     "cobol",
     "css",
+    "css3",
     "dart",
     "digitalocean",
     "django",
