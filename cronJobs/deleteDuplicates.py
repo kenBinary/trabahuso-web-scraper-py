@@ -1,8 +1,11 @@
 import sqlite3
+import os
 
 
 def main():
-    connection = sqlite3.connect("../../db/job_record.db")
+    dbPath = os.getenv("DB_FILE_PATH")
+    # connection = sqlite3.connect("../../db/job_record.db")
+    connection = sqlite3.connect(f"{dbPath}")
     cursor = connection.cursor()
     duplicates = cursor.execute(
         """SELECT job_title,

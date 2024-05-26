@@ -4,20 +4,21 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.firefox.firefox_profile import FirefoxProfile
+import os
 
 
 def browserDriver():
 
-    service = Service(
-        r"C:\Users\Kenneth\Downloads\Compressed\geckodriver-v0.34.0-win64\geckodriver.exe"
-    )
+    browserProfilePath = os.getenv("BROWSER_PROFILE")
+    browserDriverPath = os.getenv("BROWSER_DRIVER")
+    service = Service(f"{browserDriverPath}")
+    # r"C:\Users\Kenneth\Downloads\Compressed\geckodriver-v0.34.0-win64\geckodriver.exe"
 
     driver_options = webdriver.FirefoxOptions()
     driver_options.add_argument("-profile")
     driver_options.set_preference("dom.webdriver.enabled", False)
-    driver_options.add_argument(
-        r"C:\Users\Kenneth\AppData\Roaming\Mozilla\Firefox\Profiles\ael5r3vy.second profile"
-    )
+    driver_options.add_argument(f"{browserProfilePath}")
+    # r"C:\Users\Kenneth\AppData\Roaming\Mozilla\Firefox\Profiles\ael5r3vy.second profile"
 
     browser = webdriver.Firefox(service=service, options=driver_options)
     return browser

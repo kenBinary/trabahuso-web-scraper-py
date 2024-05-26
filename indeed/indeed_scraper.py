@@ -18,6 +18,7 @@ from utils.helpers import (
     normalize_job_level,
     determine_tech_stack,
 )
+import os
 
 
 def scrape_page(browser: WebDriver) -> list[dict]:
@@ -139,6 +140,7 @@ def scrape_indeed():
     # baseUrl = rf"https://ph.indeed.com/jobs?q=software%20developer&fromage=7&sort=date&start={page}"
     baseUrl = rf"https://ph.indeed.com/jobs?q=software%20developer&fromage=7&sort=date&start=0"
     browser.get(baseUrl)
+    dbPath = os.getenv("DB_FILE_PATH")
 
     is_end_of_page = True
     while is_end_of_page:
@@ -157,12 +159,13 @@ def scrape_indeed():
                 filemode="a",
                 format="[%(asctime)s - %(levelname)s]: %(message)s",
             )
-            logging.warning(f"Could not scrape at page: {page}")
+            logging.warning(f"Could not scrape at page: {page} on INDEED")
             logging.error(f"Error Type: {e}")
             break
 
         try:
-            connection = sqlite3.connect("../../db/job_record.db")
+            # connection = sqlite3.connect("../../db/job_record.db")
+            connection = sqlite3.connect(dbPath)
             cursor = connection.cursor()
 
             for data in scraped_data:
