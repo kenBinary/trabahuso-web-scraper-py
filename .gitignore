@@ -2,9 +2,9 @@ venv
 *.pyc
 *.pyo
 __pycache__
-src/test.py
+test.py
 *.drawio.bkp
-src/logs/*.log
+logs/*.log
 .env.*
 src/db/*
-!src/db/.gitkeep
+!db/.gitkeep
