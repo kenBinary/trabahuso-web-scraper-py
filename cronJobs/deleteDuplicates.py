@@ -1,12 +1,25 @@
-import sqlite3
 import os
+from dotenv import load_dotenv
+import sys
+import libsql_experimental as libsql
 
 
 def main():
-    dbPath = os.getenv("DB_FILE_PATH")
-    # connection = sqlite3.connect("../../db/job_record.db")
-    connection = sqlite3.connect(f"{dbPath}")
+    if len(sys.argv) < 2:
+        print('supply environment type of either "dev" or "prod"')
+        return
+
+    if sys.argv[1] == "prod":
+        load_dotenv(".env.production")
+    else:
+        load_dotenv(".env.development")
+
+    db_url = os.getenv("DATABASE_URL")
+    db_token = os.getenv("TURSO_AUTH_TOKEN")
+
+    connection = libsql.connect(database=db_url, auth_token=db_token)
     cursor = connection.cursor()
+
     duplicates = cursor.execute(
         """SELECT job_title,
        count(job_title),
@@ -51,12 +64,14 @@ HAVING count(job_title) > 1 AND
                     date_scraped = ?
                     LIMIT 1;
             """,
-                (
-                    job_title,
-                    job_location,
-                    job_salary,
-                    job_level,
-                    date_scraped,
+                tuple(
+                    [
+                        job_title,
+                        job_location,
+                        job_salary,
+                        job_level,
+                        date_scraped,
+                    ]
                 ),
             ).fetchall()
 
@@ -65,7 +80,7 @@ HAVING count(job_title) > 1 AND
             DELETE FROM tech_skill
                 WHERE job_data_id = ?;
                 """,
-                (job_id[0][0],),
+                tuple([job_id[0][0]]),
             )
 
             cursor.execute(
@@ -73,7 +88,7 @@ HAVING count(job_title) > 1 AND
             DELETE FROM job_data
                 WHERE job_data_id = ?;
                 """,
-                (job_id[0][0],),
+                tuple([job_id[0][0]]),
             )
     except Exception as e:
         print(e)

@@ -6,5 +6,5 @@ test.py
 *.drawio.bkp
 logs/*.log
 .env.*
-src/db/*
+db/*
 !db/.gitkeep

@@ -7,7 +7,7 @@ import uuid
 import time
 from datetime import datetime
 import re
-import sqlite3
+import libsql_experimental as libsql
 from selenium.webdriver.remote.webdriver import WebDriver
 from utils.helpers import (
     is_location_remote,
@@ -137,10 +137,10 @@ def scrape_page(browser: WebDriver) -> list[dict]:
 def scrape_indeed():
 
     browser = scraper.browserDriver()
-    # baseUrl = rf"https://ph.indeed.com/jobs?q=software%20developer&fromage=7&sort=date&start={page}"
     baseUrl = rf"https://ph.indeed.com/jobs?q=software%20developer&fromage=7&sort=date&start=0"
     browser.get(baseUrl)
-    dbPath = os.getenv("DB_FILE_PATH")
+    dbPath = os.getenv("DATABASE_URL")
+    db_token = os.getenv("TURSO_AUTH_TOKEN")
 
     is_end_of_page = True
     while is_end_of_page:
@@ -164,34 +164,38 @@ def scrape_indeed():
             break
 
         try:
-            # connection = sqlite3.connect("../../db/job_record.db")
-            connection = sqlite3.connect(dbPath)
+
+            connection = libsql.connect(database=dbPath, auth_token=db_token)
             cursor = connection.cursor()
 
-            for data in scraped_data:
-
-                cursor.execute(
-                    "INSERT INTO job_data VALUES (?,?,?,?,?,?);",
-                    (
+            job_data = [
+                tuple(
+                    [
                         data["job_data_id"],
                         data["title"],
                         data["location"],
-                        data["salary"],
-                        data["job_level"],
+                        data["salary"] if data["salary"] else 0,
+                        data["job_level"] if data["job_level"] else "",
                         data["date_scraped"],
-                    ),
+                    ]
                 )
+                for data in scraped_data
+            ]
 
-                tech_stack = data["tech_stack"]
-                for tech in tech_stack:
-                    cursor.execute(
-                        "INSERT INTO tech_skill VALUES (?,?,?);",
-                        (
+            cursor.executemany("INSERT INTO job_data VALUES (?,?,?,?,?,?);", job_data)
+
+            for data in scraped_data:
+                tech_list: list[tuple] = [
+                    tuple(
+                        [
                             tech["tech_stack_id"],
                             tech["job_data_id"],
                             tech["tech_type"],
-                        ),
+                        ]
                     )
+                    for tech in data["tech_stack"]
+                ]
+                cursor.executemany("INSERT INTO tech_skill VALUES (?,?,?);", tech_list)
 
             connection.commit()
         except BaseException as e:
@@ -202,8 +206,6 @@ def scrape_indeed():
                 format="[%(asctime)s - %(levelname)s]: %(message)s",
             )
             logging.error(f"Error Occured while inserting data to db: {e}")
-        finally:
-            connection.close()
 
         try:
             next_page_button_locator = "[data-testid='pagination-page-next']"
