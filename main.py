@@ -9,6 +9,8 @@ def main():
         print('supply environment type of either "dev" or "prod"')
         return
 
+    load_dotenv(".env")
+
     if sys.argv[1] == "prod":
         load_dotenv(".env.production")
     else:
