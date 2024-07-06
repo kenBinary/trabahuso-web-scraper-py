@@ -5,6 +5,7 @@ __pycache__
 test.py
 *.drawio.bkp
 logs/*.log
+.env
 .env.*
 db/*
 !db/.gitkeep
